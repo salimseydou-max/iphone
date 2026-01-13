@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -15,6 +14,7 @@ import { Screen } from "../components/Screen";
 import { SearchBar } from "../components/SearchBar";
 import { CategoryChips } from "../components/CategoryChips";
 import { EventCard } from "../components/EventCard";
+import { EventCardSkeleton } from "../components/EventCardSkeleton";
 import { listEvents } from "../api/eventsApi";
 import { useFavorites } from "../features/favorites/FavoritesContext";
 import { useTheme } from "../theme/useTheme";
@@ -100,7 +100,7 @@ export function ExploreScreen() {
       <CategoryChips value={category} onChange={setCategory} />
 
       <FlatList
-        data={events}
+        data={loading ? ([] as Event[]) : events}
         keyExtractor={(e) => e.id}
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -113,8 +113,10 @@ export function ExploreScreen() {
         }
         ListEmptyComponent={
           loading ? (
-            <View style={styles.center}>
-              <ActivityIndicator />
+            <View style={{ paddingTop: 8 }}>
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <EventCardSkeleton key={idx} />
+              ))}
             </View>
           ) : error ? (
             <View style={styles.center}>

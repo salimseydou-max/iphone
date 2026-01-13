@@ -35,7 +35,28 @@ See `.env.example`.
 ### Build notes
 
 - **iOS / App Store**: this codebase avoids web-only hacks and uses native navigation + AsyncStorage.
-- **Web / Vercel**: Expo web works via `npx expo export --platform web` and Vercel static hosting.
+- **Web / Vercel**: Expo web works via `npm run export:web` and Vercel static hosting.
+
+### Screens
+
+- `Explore`: browse by category + search, pull-to-refresh, skeleton loading
+- `Event details`: image + time/location + description + save/unsave
+- `Favorites`: saved list backed by AsyncStorage
+
+### API layer
+
+- Ticketmaster (when configured): `src/api/ticketmaster.ts`
+- Mock fallback (no keys needed): `src/api/mockData.ts`
+- Provider switch + mapping: `src/api/eventsApi.ts`
+
+### Deploy to Vercel (Expo web)
+
+This repo includes a `vercel.json` that exports the site into `dist/`.
+
+- **Build Command**: `npm run export:web`
+- **Output Directory**: `dist`
+
+If you need runtime variables on Vercel, set `EXPO_PUBLIC_*` env vars in the Vercel project settings.
 
 ### Project structure
 

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "react-native";
+import { enableScreens } from "react-native-screens";
 
 import type { RootStackParamList, TabsParamList } from "./types";
 import { ExploreScreen } from "../screens/ExploreScreen";
@@ -14,16 +15,18 @@ import { useFavorites } from "../features/favorites/FavoritesContext";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<TabsParamList>();
 
+enableScreens(true);
+
 function TabsNavigator() {
   return (
     <Tabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarIcon: ({ color, size }) => {
-          const name =
-            route.name === "Explore"
-              ? "compass-outline"
-              : "heart-outline";
+        tabBarIcon: ({ color, size, focused }) => {
+          const name = (() => {
+            if (route.name === "Explore") return focused ? "compass" : "compass-outline";
+            return focused ? "heart" : "heart-outline";
+          })();
           return <Ionicons name={name} size={size} color={color} />;
         },
       })}
