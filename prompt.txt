@@ -1,0 +1,147 @@
+📱 Cursor Prompt: iPhone App Idea (Expo / React Native)
+
+Role:
+You are a senior iOS / React Native engineer building a production-ready iPhone mobile app using Expo + React Native, with clean architecture and modern best practices. The app should be deployable via Vercel (Expo web support) and App Store–ready.
+
+🧠 App Overview
+
+Build an iPhone app that helps users discover and track nearby local events and activities (concerts, meetups, festivals, workshops). The app should allow users to browse events, save favorites, and view event details in a clean, native mobile experience optimized for iOS.
+
+The app should feel fast, minimal, and “Apple-like” in design.
+
+✅ Requirements
+
+Use Expo (React Native) with TypeScript
+
+Target iPhone first (iOS-optimized UI/UX)
+
+Functional components with hooks
+
+Clean folder structure
+
+Environment variable support
+
+Ready for App Store submission (no web-only hacks)
+
+Compatible with Vercel deployment (Expo web)
+
+✨ Features
+Core Features
+
+Browse nearby events by category (music, tech, fitness, food, art)
+
+Search events by name or keyword
+
+View event details:
+
+Title
+
+Description
+
+Date & time
+
+Location
+
+Image
+
+Save / unsave events (favorites)
+
+Simple local persistence for favorites (AsyncStorage)
+
+Optional Enhancements
+
+Location-based filtering (city or coordinates)
+
+Dark mode support
+
+Pull-to-refresh event list
+
+Skeleton loaders for better UX
+
+🌐 API
+
+Use an open public events API (or mock data if needed) such as:
+
+Ticketmaster Discovery API
+
+Eventbrite public API
+
+OR a mocked REST API structure if API keys are unavailable
+
+API Expectations
+
+Fetch a list of events
+
+Fetch event details by ID
+
+Handle loading and error states gracefully
+
+Store API keys securely via environment variables
+
+🎨 Styling & UI
+
+iOS-first design principles
+
+Use native-feeling components
+
+Minimal, clean layout inspired by Apple apps
+
+Rounded cards, subtle shadows, smooth transitions
+
+Use:
+
+StyleSheet or styled-components
+
+System fonts (San Francisco style)
+
+Support light & dark mode
+
+🚀 Deployment Readiness
+
+App should run with npx expo start
+
+Expo configuration ready for:
+
+iOS build
+
+Web build (for Vercel)
+
+Environment variables documented
+
+No hardcoded secrets
+
+Clear instructions for:
+
+Local development
+
+Production build
+
+Vercel deployment (Expo web)
+
+📦 Output Expectations
+
+Provide:
+
+Recommended project folder structure
+
+Key screens and components
+
+Example API service file
+
+Example environment variable usage
+
+Any necessary Expo configuration
+
+Clear comments explaining important decisions
+
+Write clean, maintainable, production-quality code with iOS best practices in mind.
+
+If you want, I can:
+
+Tailor this for a different iPhone app idea
+
+Make it AI-powered
+
+Add authentication
+
+Optimize it specifically for App Store review approval
