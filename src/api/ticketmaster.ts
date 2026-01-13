@@ -78,10 +78,15 @@ export async function ticketmasterListEvents(params: {
   keyword?: string;
   category?: EventCategory;
   city?: string;
+  page?: number; // 0-based
+  pageSize?: number;
 }): Promise<Event[]> {
   const url = new URL("https://app.ticketmaster.com/discovery/v2/events.json");
   url.searchParams.set("apikey", ticketmasterApiKey);
-  url.searchParams.set("size", "30");
+  url.searchParams.set("size", String(params.pageSize ?? 30));
+  if (typeof params.page === "number") {
+    url.searchParams.set("page", String(params.page));
+  }
 
   if (params.keyword) url.searchParams.set("keyword", params.keyword);
   if (params.city) url.searchParams.set("city", params.city);

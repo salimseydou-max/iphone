@@ -9,7 +9,7 @@ import { useFavorites } from "../features/favorites/FavoritesContext";
 import { useTheme } from "../theme/useTheme";
 import type { Event } from "../types/event";
 import type { RootStackParamList } from "../navigation/types";
-import { getEventById, listEvents } from "../api/eventsApi";
+import { getEventById } from "../api/eventsApi";
 
 export function FavoritesScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -26,8 +26,6 @@ export function FavoritesScreen() {
   const fetchFavorites = useCallback(async () => {
     setError(null);
 
-    // When on Ticketmaster, fetch details by id; for mock, we can also do that,
-    // but listEvents() is cheaper for small mock data.
     if (favoriteIdList.length === 0) {
       setItems([]);
       return;
@@ -36,12 +34,6 @@ export function FavoritesScreen() {
     // Try the id-based fetch (works for both providers).
     const results = await Promise.all(favoriteIdList.map((id) => getEventById(id)));
     const filtered = results.filter((e): e is Event => Boolean(e));
-    // Fallback: if provider can't resolve ids (rare), try listEvents and filter.
-    if (filtered.length === 0) {
-      const all = await listEvents({});
-      setItems(all.filter((e) => favoriteIds.has(e.id)));
-      return;
-    }
     setItems(filtered);
   }, [favoriteIdList, favoriteIds]);
 

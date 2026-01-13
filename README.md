@@ -29,6 +29,7 @@ Expo supports runtime env vars via `EXPO_PUBLIC_*`.
 
 - `EXPO_PUBLIC_EVENTS_PROVIDER`: `ticketmaster` | `mock` (default: `mock`)
 - `EXPO_PUBLIC_TICKETMASTER_API_KEY`: Ticketmaster Discovery API key
+- `EXPO_PUBLIC_MOCK_TOTAL_EVENTS`: mock dataset size (default: `3000000`, generated on-demand)
 
 See `.env.example`.
 

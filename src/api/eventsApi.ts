@@ -1,34 +1,63 @@
 import type { Event, EventCategory } from "../types/event";
 import { isTicketmasterEnabled } from "./config";
-import { mockEvents } from "./mockData";
 import { ticketmasterGetEvent, ticketmasterListEvents } from "./ticketmaster";
+import { mockListEvents } from "./mockProvider";
 
+export async function listEventsPage(params: {
+  keyword?: string;
+  category?: EventCategory;
+  city?: string;
+  page: number; // 0-based
+  pageSize: number;
+}): Promise<{ events: Event[]; hasMore: boolean }> {
+  if (isTicketmasterEnabled) {
+    const events = await ticketmasterListEvents(params);
+    // Ticketmaster pagination is finite; if we got less than requested, assume no more.
+    return { events, hasMore: events.length === params.pageSize };
+  }
+
+  return mockListEvents({
+    keyword: params.keyword,
+    category: params.category,
+    city: params.city,
+    page: params.page,
+    pageSize: params.pageSize,
+  });
+}
+
+// Back-compat helper: return the first page only.
 export async function listEvents(params: {
   keyword?: string;
   category?: EventCategory;
   city?: string;
+  page?: number; // 0-based
+  pageSize?: number;
 }): Promise<Event[]> {
-  if (isTicketmasterEnabled) {
-    return await ticketmasterListEvents(params);
-  }
-
-  // Mock fallback: filter in-memory to keep UX identical when no API key is configured.
-  const keyword = params.keyword?.trim().toLowerCase() ?? "";
-  const city = params.city?.trim().toLowerCase() ?? "";
-
-  return mockEvents.filter((e) => {
-    if (params.category && e.category !== params.category) return false;
-    if (city && !(e.city ?? "").toLowerCase().includes(city)) return false;
-    if (!keyword) return true;
-    const hay = `${e.title} ${e.description ?? ""} ${e.venueName ?? ""}`.toLowerCase();
-    return hay.includes(keyword);
+  const { events } = await listEventsPage({
+    keyword: params.keyword,
+    category: params.category,
+    city: params.city,
+    page: params.page ?? 0,
+    pageSize: params.pageSize ?? 30,
   });
+  return events;
 }
 
 export async function getEventById(id: string): Promise<Event | null> {
   if (isTicketmasterEnabled) {
     return await ticketmasterGetEvent(id);
   }
-  return mockEvents.find((e) => e.id === id) ?? null;
+  // Lightweight mock resolution: parse `mock-<index>` and regenerate.
+  const m = /^mock-(\d+)$/.exec(id);
+  if (!m) return null;
+  const idx = Number(m[1]);
+  const { events } = mockListEvents({
+    page: idx,
+    pageSize: 1,
+    keyword: undefined,
+    category: undefined,
+    city: undefined,
+  });
+  return events[0] ?? null;
 }
 

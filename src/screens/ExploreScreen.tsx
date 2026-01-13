@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -15,10 +16,12 @@ import { SearchBar } from "../components/SearchBar";
 import { CategoryChips } from "../components/CategoryChips";
 import { EventCard } from "../components/EventCard";
 import { EventCardSkeleton } from "../components/EventCardSkeleton";
-import { listEvents } from "../api/eventsApi";
+import { listEventsPage } from "../api/eventsApi";
 import { useFavorites } from "../features/favorites/FavoritesContext";
 import { useTheme } from "../theme/useTheme";
 import type { RootStackParamList } from "../navigation/types";
+
+const PAGE_SIZE = 30;
 
 export function ExploreScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -31,8 +34,11 @@ export function ExploreScreen() {
 
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   const emptyTitle = useMemo(() => {
     if (loading) return "";
@@ -40,18 +46,53 @@ export function ExploreScreen() {
     return "No events found";
   }, [error, loading]);
 
-  const fetchData = useCallback(async () => {
+  const query = useMemo(
+    () => ({
+      keyword,
+      category,
+      city: city.trim() || undefined,
+    }),
+    [category, city, keyword],
+  );
+
+  const fetchFirstPage = useCallback(async () => {
     setError(null);
-    const data = await listEvents({ keyword, category, city: city.trim() || undefined });
-    setEvents(data);
-  }, [category, city, keyword]);
+    const res = await listEventsPage({
+      ...query,
+      page: 0,
+      pageSize: PAGE_SIZE,
+    });
+    setEvents(res.events);
+    setPage(0);
+    setHasMore(res.hasMore);
+  }, [query]);
+
+  const fetchNextPage = useCallback(async () => {
+    if (loading || refreshing || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const res = await listEventsPage({
+        ...query,
+        page: nextPage,
+        pageSize: PAGE_SIZE,
+      });
+      setEvents((prev) => [...prev, ...res.events]);
+      setPage(nextPage);
+      setHasMore(res.hasMore);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load more events");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loading, loadingMore, page, query, refreshing]);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         setLoading(true);
-        await fetchData();
+        await fetchFirstPage();
       } catch (e) {
         if (!alive) return;
         setError(e instanceof Error ? e.message : "Failed to load events");
@@ -63,18 +104,18 @@ export function ExploreScreen() {
     return () => {
       alive = false;
     };
-  }, [fetchData]);
+  }, [fetchFirstPage]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await fetchData();
+      await fetchFirstPage();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to refresh");
     } finally {
       setRefreshing(false);
     }
-  }, [fetchData]);
+  }, [fetchFirstPage]);
 
   return (
     <Screen>
@@ -104,11 +145,20 @@ export function ExploreScreen() {
         keyExtractor={(e) => e.id}
         contentContainerStyle={{ paddingBottom: 24 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        onEndReachedThreshold={0.4}
+        onEndReached={fetchNextPage}
         ListHeaderComponent={
           city.trim() ? (
             <Text style={[styles.cityHint, { color: colors.secondaryText }]}>
               Filtering by city: {city.trim()}
             </Text>
+          ) : null
+        }
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={styles.footer}>
+              <ActivityIndicator />
+            </View>
           ) : null
         }
         ListEmptyComponent={
@@ -191,6 +241,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     textAlign: "center",
+  },
+  footer: {
+    paddingTop: 8,
+    paddingBottom: 16,
+    alignItems: "center",
   },
 });
 
